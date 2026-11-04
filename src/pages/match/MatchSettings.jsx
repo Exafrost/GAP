@@ -19,7 +19,7 @@ export default function MatchSettings({ games, players, gameId, onGame, date, on
         {players.map((p) => {
           const on = picked.some((x) => x.id === p.id);
           return (
-            <button key={p.id} type="button" className={'player' + (on ? ' on' : '')} aria-pressed={on} onClick={() => onToggle(p.id)}>
+            <button key={p.id} type="button" className={'button toggable-button' + (on ? ' toggled' : '')} aria-pressed={on} onClick={() => onToggle(p.id)}>
               {p.name}
             </button>
           );

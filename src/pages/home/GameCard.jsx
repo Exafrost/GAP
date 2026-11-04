@@ -16,7 +16,7 @@ export default function GameCard({ game }) {
         <p className="muted">{plural(matches.length, 'partie')} · {plural(ranking.length, 'joueur')}</p>
         {leader && (
           <p className="leader">
-            <span className="token t1 sm">1</span> {names[leader.player_id]} <b>{Math.round(leader.elo)}</b>
+            <span className="ranking-token p1 sm">1</span> {names[leader.player_id]} <b>{Math.round(leader.elo)}</b>
           </p>
         )}
       </div>

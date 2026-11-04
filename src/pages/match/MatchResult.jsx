@@ -23,7 +23,7 @@ export default function MatchResult({ picked, names, calc, k, canSave, onRang, o
       {picked.length > 0 && (
         <p className="note">Même rang = égalité.{k != null && ` Coefficient K appliqué : ${k} (${picked.length} joueurs).`}</p>
       )}
-      <button className="btn" disabled={!canSave} onClick={onSave}>Enregistrer la partie</button>
+      <button className="button button-primary" disabled={!canSave} onClick={onSave}>Enregistrer la partie</button>
     </section>
   );
 }

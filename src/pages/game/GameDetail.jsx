@@ -5,12 +5,14 @@ import { gameStats, kSummary } from '../../lib/games';
 import { plural } from '../../lib/format';
 import RankingTable from './RankingTable';
 import MatchHistory from './MatchHistory';
+import OwnersEditor from './OwnersEditor';
 
 export default function GameDetail() {
   const { gameId } = useParams();
   const { data, names } = useApp();
   const game = data.games.find((g) => g.id === gameId);
-
+  const owners = game.game_owners.map((o) => o.players.name).sort();
+  
   if (!game) {
     return (
       <>
@@ -29,11 +31,16 @@ export default function GameDetail() {
         <div>
           <h1>{game.name}</h1>
           <p className="lead">{plural(matches.length, 'partie')} · {plural(ranking.length, 'joueur')}</p>
+          {owners.length === 1 && <p className="muted">Détenteur : {owners[0]}</p>}
+          {owners.length > 1 && <p className="muted">Détenteurs : {owners.join(', ')}</p>}
           <p className="muted">{kSummary(game, data.ks)}</p>
-          <Link className="btn inline" to={`/partie?jeu=${game.id}`}>Nouvelle partie</Link>
+          
         </div>
       </header>
-
+      <div className="btn-row">
+        <OwnersEditor key={game.id} game={game} />
+        <Link className="button button-primary inline" to={`/partie?jeu=${game.id}`}>Nouvelle partie</Link>
+      </div>
       <div className="cols">
         <section className="panel">
           <h2 className="panel-title">Classement actuel</h2>

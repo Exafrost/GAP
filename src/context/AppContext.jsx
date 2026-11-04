@@ -14,7 +14,7 @@ export function AppProvider({ children }) {
   const load = useCallback(async () => {
     const res = await Promise.all([
       supabase.from('players').select('*').order('name'),
-      supabase.from('games').select('*').order('name'),
+      supabase.from('games').select('*, game_owners(player_id, players(name))').order('name'),
       supabase.from('game_k_factors').select('*'),
       supabase.from('ratings').select('*'),
       supabase

@@ -44,7 +44,7 @@ export default function MatchHistory({ matches, names }) {
             const d = Math.round((p.elo_after - p.elo_before) * 10) / 10;
             return (
               <div className="line" key={p.player_id}>
-                <span className="token sm">{p.rang}</span>
+                <span className="ranking-token sm">{p.rang}</span>
                 <span className="grow">{names[p.player_id]}</span>
                 <span>{Math.round(p.elo_after)}</span>
                 <b className={'delta ' + (d >= 0 ? 'up' : 'down')}>{sign(d)}</b>

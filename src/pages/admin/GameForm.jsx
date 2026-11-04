@@ -42,7 +42,7 @@ export default function GameForm() {
       <label htmlFor="img">Fichier image <span className="muted">facultatif</span></label>
       <input id="img" placeholder="catan.jpg" value={image} onChange={(e) => setImage(e.target.value)} />
       <p className="note">Placez l’image dans <code>public/games/</code>. Sans nom de fichier, le site cherche <code>nom-du-jeu.jpg</code>.</p>
-      <button className="btn">Ajouter le jeu</button>
+      <button className="button button-primary">Ajouter le jeu</button>
     </form>
   );
 }

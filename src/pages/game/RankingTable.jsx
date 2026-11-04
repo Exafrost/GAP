@@ -13,7 +13,7 @@ export default function RankingTable({ rows, names }) {
       <tbody>
         {rows.map((r, i) => (
           <tr key={r.player_id} className={i === 0 ? 'first' : ''}>
-            <td><span className={'token t' + Math.min(i + 1, 4)}>{i + 1}</span></td>
+            <td><span className={'ranking-token p' + Math.min(i + 1, 4)}>{i + 1}</span></td>
             <td><b>{names[r.player_id]}</b></td>
             <td className="num">{r.games_played}</td>
             <td className="num elo">{Math.round(r.elo)}</td>

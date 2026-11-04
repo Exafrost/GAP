@@ -21,7 +21,7 @@ export default function PlayerForm() {
       <h2>Ajouter un joueur</h2>
       <label htmlFor="pname">Prénom</label>
       <input id="pname" value={name} onChange={(e) => setName(e.target.value)} required />
-      <button className="btn">Ajouter le joueur</button>
+      <button className="button button-primary">Ajouter le joueur</button>
     </form>
   );
 }
