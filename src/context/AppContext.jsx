@@ -19,7 +19,7 @@ export function AppProvider({ children }) {
       supabase.from('ratings').select('*'),
       supabase
         .from('matches')
-        .select('id, played_at, created_at, game_id, match_players(player_id, rang, elo_before, elo_after)')
+        .select('id, played_at, created_at, game_id, details, match_players(player_id, rang, elo_before, elo_after, details)')
         .order('played_at', { ascending: false })
         .order('created_at', { ascending: false }),
     ]);

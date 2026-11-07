@@ -48,7 +48,7 @@ export default function GameDetail() {
         </section>
         <section className="panel pad">
           <h2>Historique des parties</h2>
-          <MatchHistory matches={matches} names={names} />
+          <MatchHistory matches={matches} names={names} game={game} />
         </section>
       </div>
     </>

@@ -16,11 +16,11 @@ export default function MatchSettings({ games, players, gameId, onGame, date, on
       <label>Joueurs <span className="muted">{plural(picked.length, 'sélectionné')}</span></label>
       {!players.length && <p className="note">Aucun joueur. Ajoutez-en dans « Gestion ».</p>}
       <div className="pgrid">
-        {players.map((p) => {
-          const on = picked.some((x) => x.id === p.id);
+        {players.map((player) => {
+          const selected = picked.some((x) => x.id === player.id);
           return (
-            <button key={p.id} type="button" className={'button toggable-button' + (on ? ' toggled' : '')} aria-pressed={on} onClick={() => onToggle(p.id)}>
-              {p.name}
+            <button key={player.id} type="button" className={'button toggable-button' + (selected ? ' toggled' : '')} aria-pressed={selected} onClick={() => onToggle(player.id)}>
+              {player.name}
             </button>
           );
         })}

@@ -7,6 +7,8 @@ import { today } from '../../lib/format';
 import PageHeader from '../../components/PageHeader';
 import MatchSettings from './MatchSettings';
 import MatchResult from './MatchResult';
+import { cleanDetails, computeFields } from '../../lib/games';
+
 
 export default function NewMatch() {
   const { data, reload, askPin, names } = useApp();
@@ -15,15 +17,43 @@ export default function NewMatch() {
   const [gameId, setGameId] = useState(data.games.some((g) => g.id === wanted) ? wanted : data.games[0]?.id ?? '');
   const [date, setDate] = useState(today());
   const [picked, setPicked] = useState([]); // [{ id, rang }]
+  const [playerDetails, setPlayerDetails] = useState({}); // { [playerId]: { [key]: valeur } }
+  const [matchDetails, setMatchDetails] = useState({});   // { [key]: valeur }
   const game = data.games.find((g) => g.id === gameId);
+  const fields = game?.detail_fields ?? [];
 
-  const toggle = (id) =>
+  const ofScope = (s) => fields.filter((f) => (f.scope ?? 'player') === s);
+  const setPlayerDetail = (id, key, value) =>
+    setPlayerDetails((d) => ({ ...d, [id]: { ...d[id], [key]: value } }));
+  const setMatchDetail = (key, value) => setMatchDetails((d) => ({ ...d, [key]: value }));
+  const changeGame = (id) => {
+    setGameId(id);
+    setPlayerDetails(Object.fromEntries(picked.map((p) => [p.id, {}])));
+    setMatchDetails({});
+  };
+  
+  const toggle = (id) => {
+    const removing = picked.some((x) => x.id === id);
     setPicked((p) =>
-      p.some((x) => x.id === id)
+      removing
         ? p.filter((x) => x.id !== id).map((x) => ({ ...x, rang: Math.min(x.rang, p.length - 1) }))
         : [...p, { id, rang: p.length + 1 }]
     );
+    setPlayerDetails((d) => {
+      if (removing) {
+        const { [id]: _removed, ...rest } = d; // un joueur retiré perd ses saisies
+        return rest;
+      }
+      return { ...d, [id]: {} }; // un joueur ajouté démarre avec des détails vides
+    });
+  };
   const setRang = (id, rang) => setPicked((p) => p.map((x) => (x.id === id ? { ...x, rang: Number(rang) } : x)));
+  const rankField = ofScope('player').find((f) => f.ranks);
+  const rankByPoints = () =>
+    setPicked((p) => {
+      const total = (id) => computeFields(playerDetails[id], ofScope('player'))[rankField.key] ?? 0;
+      return p.map((x) => ({ ...x, rang: 1 + p.filter((o) => total(o.id) > total(x.id)).length }));
+    });
 
   const k = game && picked.length >= 2 ? getK(game, data.ks, picked.length) : null;
   const preview = useMemo(() => {
@@ -37,11 +67,16 @@ export default function NewMatch() {
 
   const save = () =>
     askPin(async (pin) => {
+      const playerFields = ofScope('player');
       const { error } = await supabase.rpc('add_match', {
         p_pin: pin,
         p_game_id: gameId,
         p_played_at: date,
-        p_results: preview.map((p) => ({ player_id: p.id, rang: p.rang, elo_before: p.before, elo_after: p.after })),
+        p_results: preview.map((p) => ({
+          player_id: p.id, rang: p.rang, elo_before: p.before, elo_after: p.after,
+          details: cleanDetails(computeFields(playerDetails[p.id], playerFields), playerFields),
+        })),
+        p_details: cleanDetails(matchDetails, ofScope('match')),
       });
       if (error) throw error;
       await reload();
@@ -51,14 +86,19 @@ export default function NewMatch() {
   return (
     <>
       <PageHeader title="Nouvelle partie" lead="Saisir le résultat d’une partie et mettre à jour le classement" />
-      <div className="cols">
+      <div className="rows">
         <MatchSettings
-          games={data.games} players={data.players} gameId={gameId} onGame={setGameId}
+          games={data.games} players={data.players} gameId={gameId} onGame={changeGame}
           date={date} onDate={setDate} picked={picked} onToggle={toggle}
         />
+        {rankField && picked.length >= 2 && <button type="button" className="button button-primary inline" onClick={rankByPoints}>Classer selon « {rankField.label} »</button>}
         <MatchResult
-          picked={picked} names={names} calc={Object.fromEntries(preview.map((p) => [p.id, p]))} k={k}
-          canSave={Boolean(game) && picked.length >= 2 && Boolean(date)} onRang={setRang} onSave={save}
+          game={game} picked={picked} names={names}
+          calc={Object.fromEntries(preview.map((p) => [p.id, p]))} k={k}
+          canSave={Boolean(game) && picked.length >= 2 && Boolean(date)}
+          onRang={setRang} onSave={save}
+          playerDetails={playerDetails} matchDetails={matchDetails}
+          onPlayerDetail={setPlayerDetail} onMatchDetail={setMatchDetail}
         />
       </div>
     </>

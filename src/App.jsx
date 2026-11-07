@@ -4,6 +4,8 @@ import Home from './pages/home/Home';
 import GameDetail from './pages/game/GameDetail';
 import NewMatch from './pages/match/NewMatch';
 import Admin from './pages/admin/Admin';
+import MatchDetail from './pages/matchDetail/matchDetail';
+
 
 export default function App() {
   return (
@@ -11,6 +13,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="jeu/:gameId" element={<GameDetail />} />
+        <Route path="jeu/:gameId/:matchId" element={<MatchDetail />} />
         <Route path="partie" element={<NewMatch />} />
         <Route path="gestion" element={<Admin />} />
         <Route path="*" element={<Navigate to="/" replace />} />
