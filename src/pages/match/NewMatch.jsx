@@ -1,13 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '../../supabase';
 import { useApp } from '../../context/AppContext';
-import { computeElo, getK, START_ELO } from '../../elo';
+import { getK } from '../../lib/Helper/eloHelper';
 import { today } from '../../lib/format';
 import PageHeader from '../../components/PageHeader';
 import MatchSettings from './MatchSettings';
 import MatchResult from './MatchResult';
 import { cleanDetails, computeFields } from '../../lib/games';
+import { GetFieldsOfScope } from '../../lib/Helper/fieldsHelper';
+import { useMatchPreview } from '../../hooks/useMatchPreview';
+import { saveMatch } from '../../lib/supabaseCaller';
 
 
 export default function NewMatch() {
@@ -21,8 +23,10 @@ export default function NewMatch() {
   const [matchDetails, setMatchDetails] = useState({});   // { [key]: valeur }
   const game = data.games.find((g) => g.id === gameId);
   const fields = game?.detail_fields ?? [];
+  const playerFields = GetFieldsOfScope('player', fields);
+  const matchFields = GetFieldsOfScope('match', fields);
+  const rankField = playerFields.find((f) => f.ranks);
 
-  const ofScope = (s) => fields.filter((f) => (f.scope ?? 'player') === s);
   const setPlayerDetail = (id, key, value) =>
     setPlayerDetails((d) => ({ ...d, [id]: { ...d[id], [key]: value } }));
   const setMatchDetail = (key, value) => setMatchDetails((d) => ({ ...d, [key]: value }));
@@ -48,39 +52,20 @@ export default function NewMatch() {
     });
   };
   const setRang = (id, rang) => setPicked((p) => p.map((x) => (x.id === id ? { ...x, rang: Number(rang) } : x)));
-  const rankField = ofScope('player').find((f) => f.ranks);
   const rankByPoints = () =>
     setPicked((p) => {
-      const total = (id) => computeFields(playerDetails[id], ofScope('player'))[rankField.key] ?? 0;
+      const total = (id) => computeFields(playerDetails[id], playerFields)[rankField.key] ?? 0;
       return p.map((x) => ({ ...x, rang: 1 + p.filter((o) => total(o.id) > total(x.id)).length }));
     });
 
-  const k = game && picked.length >= 2 ? getK(game, data.ks, picked.length) : null;
-  const preview = useMemo(() => {
-    if (k == null) return [];
-    const withElo = picked.map((p) => ({
-      ...p,
-      elo: Number(data.ratings.find((r) => r.game_id === gameId && r.player_id === p.id)?.elo ?? START_ELO),
-    }));
-    return computeElo(withElo, k);
-  }, [picked, k, gameId, data.ratings]);
+  const k = getK(game, data.ks, picked.length);
+  const preview = useMatchPreview(game, data.ks, picked, data.ratings);
 
   const save = () =>
     askPin(async (pin) => {
-      const playerFields = ofScope('player');
-      const { error } = await supabase.rpc('add_match', {
-        p_pin: pin,
-        p_game_id: gameId,
-        p_played_at: date,
-        p_results: preview.map((p) => ({
-          player_id: p.id, rang: p.rang, elo_before: p.before, elo_after: p.after,
-          details: cleanDetails(computeFields(playerDetails[p.id], playerFields), playerFields),
-        })),
-        p_details: cleanDetails(matchDetails, ofScope('match')),
-      });
-      if (error) throw error;
+      await saveMatch(pin, gameId, date, preview, playerDetails, playerFields, matchDetails, matchFields);
       await reload();
-      navigate(`/jeu/${gameId}`); // on affiche directement le nouveau classement
+      navigate(`/jeu/${gameId}`);
     });
 
   return (

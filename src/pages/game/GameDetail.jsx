@@ -6,10 +6,12 @@ import { plural } from '../../lib/format';
 import RankingTable from './RankingTable';
 import MatchHistory from './MatchHistory';
 import OwnersEditor from './OwnersEditor';
+import { supabase } from '../../supabase';
 
 export default function GameDetail() {
   const { gameId } = useParams();
   const { data, names } = useApp();
+  const { askPin, reload } = useApp();
   const game = data.games.find((g) => g.id === gameId);
   const owners = game.game_owners.map((o) => o.players.name).sort();
   
@@ -21,8 +23,29 @@ export default function GameDetail() {
       </>
     );
   }
-
   const { ranking, matches } = gameStats(data, game.id);
+  const byRang = (m) => [...m.match_players].sort((a, b) => a.rang - b.rang);
+
+  // La « dernière » partie est la dernière SAISIE (created_at), pas forcément la plus récente en date :
+  // c'est elle qui détermine l'Elo courant, donc la seule qu'on peut annuler sans fausser les suivantes.
+  const last = matches.reduce((best, m) => (m.created_at > best.created_at ? m : best));
+  const removeLastMatch = () =>
+      askPin(
+        async (pin) => {
+          const { error } = await supabase.rpc('delete_last_match', { p_pin: pin, p_match_id: last.id });
+          if (error) throw error;
+          await reload();
+        },
+        {
+          title: 'Supprimer cette partie ?',
+          message:
+            'Les points seront annulés : ' +
+            byRang(last).map((p) => `${names[p.player_id]} ${Math.round(p.elo_after)} → ${Math.round(p.elo_before)}`).join(', ') +
+            '.',
+          confirmLabel: 'Supprimer la partie',
+        }
+      );
+
   return (
     <>
       <Link to="/" className="back">← Tous les jeux</Link>
@@ -48,6 +71,11 @@ export default function GameDetail() {
         </section>
         <section className="panel pad">
           <h2>Historique des parties</h2>
+          {last && (
+                <button className="textbtn" title="Dernière partie saisie : ses points seront annulés" onClick={() => removeLastMatch()}>
+                  Supprimer la dernière partie
+                </button>
+              )}
           <MatchHistory matches={matches} names={names} game={game} />
         </section>
       </div>
