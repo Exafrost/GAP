@@ -3,11 +3,14 @@ import { supabase } from '../../supabase';
 import { useApp } from '../../context/AppContext';
 
 export default function GameForm() {
-  const { askPin, reload } = useApp();
+  const { data, askPin, reload } = useApp();
   const [name, setName] = useState('');
   const [defK, setDefK] = useState(32);
+  const [minPlayers, setMinPlayers] = useState(2);
+  const [maxPlayers, setMaxPlayers] = useState(6);
   const [ks, setKs] = useState({});
   const [image, setImage] = useState('');
+  const [ownerIds, setOwnerIds] = useState([]);
 
   const submit = (e) => {
     e.preventDefault();
@@ -16,7 +19,8 @@ export default function GameForm() {
       .map(([n, v]) => ({ nb_players: Number(n), k_factor: Number(v) }));
     askPin(async (pin) => {
       const { error } = await supabase.rpc('add_game', {
-        p_pin: pin, p_name: name, p_default_k: Number(defK), p_k, p_image: image.trim() || null,
+        p_pin: pin, p_name: name, p_default_k: Number(defK), p_k, p_image: image.trim() || null, p_owners: ownerIds,
+        p_min_player: minPlayers, p_max_player: maxPlayers,
       });
       if (error) throw error;
       setName('');
@@ -26,6 +30,10 @@ export default function GameForm() {
     });
   };
 
+  // Détenteurs
+  const toggle = (id) => setOwnerIds((players) => (players.includes(id) ? players.filter((x) => x !== id) : [...players, id]));
+
+
   return (
     <form className="panel pad" onSubmit={submit}>
       <h2>Ajouter un jeu</h2>
@@ -33,6 +41,21 @@ export default function GameForm() {
       <input id="gname" value={name} onChange={(e) => setName(e.target.value)} required />
       <label htmlFor="dk">K par défaut</label>
       <input id="dk" type="number" min="1" value={defK} onChange={(e) => setDefK(e.target.value)} required />
+      <label htmlFor="min-player">Minimum de joueurs</label>
+      <input id="min-player" type="number" min="2" max="12" value={minPlayers} onChange={(e) => setMinPlayers(e.target.value)} required />
+      <label htmlFor="max-player">Maximum de jouers</label>
+      <input id="max-player" type="number" min="2" max="12" value={maxPlayers} onChange={(e) => setMaxPlayers(e.target.value)} required />
+      <label htmlFor="detenteurs">Détenteur(s)</label>
+      <div id="detenteurs" className="pgrid">
+        {data.players.map((player) => {
+          const on = ownerIds.includes(player.id);
+          return (
+            <button key={player.id} type="button" className={'button inline toggable-button' + (on ? ' toggled' : '')} aria-pressed={on} onClick={() => toggle(player.id)}>
+              {player.name}
+            </button>
+          );
+        })}
+      </div>
       <label>K selon le nombre de joueurs <span className="muted">facultatif</span></label>
       <div className="k-grid">
         {[2, 3, 4, 5, 6].map((n) => (
@@ -41,7 +64,7 @@ export default function GameForm() {
       </div>
       <label htmlFor="img">Fichier image <span className="muted">facultatif</span></label>
       <input id="img" placeholder="catan.jpg" value={image} onChange={(e) => setImage(e.target.value)} />
-      <p className="note">Placez l’image dans <code>public/games/</code>. Sans nom de fichier, le site cherche <code>nom-du-jeu.jpg</code>.</p>
+      <p className="note">Placez l’image dans <code>public/games/</code>. Sans nom de fichier, le site cherche <code>nom-du-jeu.extension</code>.</p>
       <button className="button button-primary">Ajouter le jeu</button>
     </form>
   );

@@ -28,7 +28,7 @@ export default function GameDetail() {
 
   // La « dernière » partie est la dernière SAISIE (created_at), pas forcément la plus récente en date :
   // c'est elle qui détermine l'Elo courant, donc la seule qu'on peut annuler sans fausser les suivantes.
-  const last = matches.reduce((best, m) => (m.created_at > best.created_at ? m : best));
+  const last = matches.reduce((best, m) => (m.created_at > best.created_at ? m : best), {});
   const removeLastMatch = () =>
       askPin(
         async (pin) => {
@@ -56,6 +56,8 @@ export default function GameDetail() {
           <p className="lead">{plural(matches.length, 'partie')} · {plural(ranking.length, 'joueur')}</p>
           {owners.length === 1 && <p className="muted">Détenteur : {owners[0]}</p>}
           {owners.length > 1 && <p className="muted">Détenteurs : {owners.join(', ')}</p>}
+          <p className='muted'>Minimum de joueurs : {game.min_player}</p>
+          <p className='muted'>Maximum de joueurs : {game.max_player}</p>
           <p className="muted">{kSummary(game, data.ks)}</p>
           
         </div>
@@ -71,7 +73,7 @@ export default function GameDetail() {
         </section>
         <section className="panel pad">
           <h2>Historique des parties</h2>
-          {last && (
+          {last?.id && (
                 <button className="textbtn" title="Dernière partie saisie : ses points seront annulés" onClick={() => removeLastMatch()}>
                   Supprimer la dernière partie
                 </button>

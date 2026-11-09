@@ -34,7 +34,6 @@ export default function Layout() {
             </Link>
           ))}
         </nav>
-        <p className="side-foot">Classements Elo entre amis</p>
       </aside>
       {menu && <div className="scrim" onClick={() => setMenu(false)} />}
 
