@@ -80,7 +80,7 @@ export default function NewMatch() {
         <MatchResult
           game={game} picked={picked} names={names}
           calc={Object.fromEntries(preview.map((p) => [p.id, p]))} k={k}
-          canSave={Boolean(game) && picked.length >= 2 && Boolean(date)}
+          canSave={Boolean(game) && picked.length >= game.min_player && picked.length <= game.max_player && Boolean(date)}
           onRang={setRang} onSave={save}
           playerDetails={playerDetails} matchDetails={matchDetails}
           onPlayerDetail={setPlayerDetail} onMatchDetail={setMatchDetail}

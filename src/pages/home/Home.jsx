@@ -7,7 +7,7 @@ export default function Home() {
   const { data } = useApp();
   return (
     <>
-      <PageHeader title="Jeux" lead="Choisissez un jeu pour voir son classement et son historique" />
+      <PageHeader title="Jeux" lead="Choisissez un jeu pour voir son classement et son historique" displayHelpELOLink={true}/>
       {data.games.length === 0 ? (
         <p className="muted">Aucun jeu pour l’instant. <Link to="/gestion">Ajoutez-en un</Link>.</p>
       ) : (

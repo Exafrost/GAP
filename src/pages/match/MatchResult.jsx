@@ -15,7 +15,7 @@ export default function MatchResult({
   return (
     <form className="panel pad" onSubmit={(e) => {e.preventDefault(); onSave();}}>
         <h2>Résultat</h2>
-        {picked.length === 0 && <p className="note">Sélectionnez au moins deux joueurs, puis indiquez le rang de chacun.</p>}
+        {picked.length === 0 && <p className="note">Sélectionnez au moins {game.min_player} joueurs, puis indiquez le rang de chacun.</p>}
         
         {picked.length > 0 && (
           <div className="table-scroll">

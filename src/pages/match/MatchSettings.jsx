@@ -1,6 +1,8 @@
 import { plural } from '../../lib/format';
 
 export default function MatchSettings({ games, players, gameId, onGame, date, onDate, picked, onToggle }) {
+  const game = games.find((g) => g.id === gameId);
+
   return (
     <section className="panel pad">
       <h2>Paramètres</h2>
@@ -13,7 +15,7 @@ export default function MatchSettings({ games, players, gameId, onGame, date, on
       <label htmlFor="date">Date de la partie</label>
       <input id="date" type="date" value={date} onChange={(e) => onDate(e.target.value)} />
 
-      <label>Joueurs <span className="muted">{plural(picked.length, 'sélectionné')}</span></label>
+      <label>Joueurs <span className="muted">{plural(picked.length, 'sélectionné')} (min : {game.min_player}, max : {game.max_player})</span></label>
       {!players.length && <p className="note">Aucun joueur. Ajoutez-en dans « Gestion ».</p>}
       <div className="pgrid">
         {players.map((player) => {

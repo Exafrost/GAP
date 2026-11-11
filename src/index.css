@@ -27,6 +27,7 @@ h3{margin:20px 0 0;font-size:1rem}
 .field-icon{width:20px;height:20px;flex:none;object-fit:contain}
 .matrix th,.matrix td{vertical-align:middle}
 input:user-invalid,select:user-invalid{border-color:var(--red)}
+.flex{display: flex; margin: 6px; gap:10px;}
 
 /* Boutons */
 .button{
@@ -80,6 +81,7 @@ input:user-invalid,select:user-invalid{border-color:var(--red)}
 .button.main{
   margin-top: 14px;
 }
+.button.sm{width: fit-content;}
 
 /* Structure : menu latéral + contenu */
 .app{display:flex;min-height:100vh}
@@ -173,6 +175,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 /* Code PIN */
 .overlay{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:16px;background:#120626cc}
 .modal{width:100%;max-width:340px;text-align:center}
+.big-modal{width:100%;max-width:800px;text-align:center}
 .pin{margin-top:8px;text-align:center;font-size:1.8rem;letter-spacing:.4em}
 .err{margin:10px 0 0;font-weight:600;color:var(--down)}
 
@@ -200,7 +203,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 a{color:var(--violet)}
 .brand,.nav,.gcard, .mcard{text-decoration:none}
 code{padding:1px 5px;border-radius:4px;background:var(--tint);font-size:.9em}
-.page-head{margin-bottom:26px}
+.page-head{margin-bottom:26px;}
 .page-head .lead{margin-bottom:0}
 .back{display:inline-block;margin-bottom:16px;font-weight:600;text-decoration:none}
 .back:hover{text-decoration:underline}
