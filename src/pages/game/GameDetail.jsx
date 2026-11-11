@@ -7,13 +7,32 @@ import RankingTable from './RankingTable';
 import MatchHistory from './MatchHistory';
 import OwnersEditor from './OwnersEditor';
 import { supabase } from '../../supabase';
+import { useState } from 'react';
+import FieldEditor from '../../components/FieldEditor';
+import { GetScoreFieldFormatted } from '../../lib/Helper/fieldsHelper';
 
 export default function GameDetail() {
   const { gameId } = useParams();
   const { data, names } = useApp();
   const { askPin, reload } = useApp();
+  const [displayScoreField, setDisplayScoreField] = useState(null);
+  const [displayOwnerEditor, setDisplayOwnerEditor] = useState(null);
   const game = data.games.find((g) => g.id === gameId);
   const owners = game.game_owners.map((o) => o.players.name).sort();
+
+ const initScoreFields = () =>
+  (game?.detail_fields ?? []).map((field, i) => ({
+    id: i + 1,
+    key: field.key,
+    name: field.label ?? '',
+    required: field.required !== false,
+    type: field.type === 'computed' ? 'computed' : 'player',
+    computeFunction: field.calculator ?? '',
+    iconPath: field.icon ?? '',
+    ranks: Boolean(field.ranks),
+  }));
+
+  const [scoreField, setScoreFields] = useState(initScoreFields());
   
   if (!game) {
     return (
@@ -28,7 +47,7 @@ export default function GameDetail() {
 
   // La « dernière » partie est la dernière SAISIE (created_at), pas forcément la plus récente en date :
   // c'est elle qui détermine l'Elo courant, donc la seule qu'on peut annuler sans fausser les suivantes.
-  const last = matches.reduce((best, m) => (m.created_at > best.created_at ? m : best), {});
+  const last = matches.reduce((best, m) => (m.created_at > best.created_at ? m : best), {created_at:"1999-01-01"});
   const removeLastMatch = () =>
       askPin(
         async (pin) => {
@@ -46,6 +65,21 @@ export default function GameDetail() {
         }
       );
 
+  const updateScoreFields = () => {
+    askPin(
+      async (pin) => {
+        const { error } = await supabase.rpc('set_game_fields', {
+          p_pin: pin,
+          p_game_id: game.id,
+          p_detail_fields: GetScoreFieldFormatted(scoreField),
+        });
+        if (error) throw error;
+        await reload();
+        setDisplayScoreField(null);
+      }
+    )
+  }
+
   return (
     <>
       <Link to="/" className="back">← Tous les jeux</Link>
@@ -62,9 +96,20 @@ export default function GameDetail() {
           
         </div>
       </header>
+      {displayScoreField && 
+      <div className='panel pad'>
+        <h2>Modifier les champs de score</h2>
+        <FieldEditor scoreField={scoreField} setScoreFields={setScoreFields}/>
+        <div className="btn-row">
+          <button type='button' className='button button-primary inline' onClick={() => updateScoreFields()}>Confirmer</button>
+          <button type='button' className='button button-secondary inline' onClick={() => setDisplayScoreField(null)}>Annuler</button>
+        </div>
+      </div>}
       <div className="btn-row">
-        <OwnersEditor key={game.id} game={game} />
-        <Link className="button button-primary inline" to={`/partie?jeu=${game.id}`}>Nouvelle partie</Link>
+        {!displayScoreField && <OwnersEditor key={game.id} game={game} setOpenEditor={setDisplayOwnerEditor} />}
+        {!displayScoreField && !displayOwnerEditor && <button type='button' className='button button-primary inline' onClick={() => setDisplayScoreField(true)}>Modifier les champs de score</button>}
+        
+        {!displayScoreField && !displayOwnerEditor && <Link className="button button-primary inline" to={`/partie?jeu=${game.id}`}>Nouvelle partie</Link>}
       </div>
       <div className="cols">
         <section className="panel">
