@@ -60,7 +60,7 @@ export default function MatchResult({
                           field={field}
                           label={`${field.label} de ${names[player.id]}`}
                           value={field.type === 'computed' ? computed[player.id][field.key] : playerDetails[player.id]?.[field.key] ?? ''}
-                          onChange={(v) => onPlayerDetail(player.id, field.key, v)}
+                          onChange={(v) => onPlayerDetail(player.id, field.key, Number(v))}
                           parts={explainField(field, playerDetails[player.id])}
                         />
                       </td>

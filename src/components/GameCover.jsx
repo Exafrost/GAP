@@ -16,5 +16,10 @@ export default function GameCover({ game, className = '' }) {
       </div>
     );
   }
-  return <img className={`cover ${className}`} src={gameImageUrl(game)} alt={`Image du jeu ${game.name}`} onError={() => setFailed(true)} />;
+  const url = gameImageUrl(game);
+  return (
+    <div className={`cover ${className}`} style={{ '--cover-url': `url("${encodeURI(url)}")` }}>
+      <img src={url} alt={`Image du jeu ${game.name}`} onError={() => setFailed(true)} />
+    </div>
+  );
 }
