@@ -18,8 +18,9 @@ export default function GameCover({ game, className = '' }) {
   }
   const url = gameImageUrl(game);
   return (
-    <div className={`cover ${className}`} style={{ '--cover-url': `url("${encodeURI(url)}")` }}>
-      <img src={url} alt={`Image du jeu ${game.name}`} onError={() => setFailed(true)} />
+    <div className={`cover ${className}`}>
+      <img className="cover-bg" src={url} alt="" aria-hidden="true" />
+      <img className="cover-img" src={url} alt={`Image du jeu ${game.name}`} onError={() => setFailed(true)} />
     </div>
   );
 }
