@@ -221,7 +221,7 @@ code{padding:1px 5px;border-radius:4px;background:var(--tint);font-size:.9em}
 
 /* Image des jeux */
 .cover{position:relative;display:block;overflow:hidden;width:100%;aspect-ratio:4/3;background:var(--line)}
-.cover-bg{position:absolute;top:-24px;left:-24px;width:calc(100% + 48px);height:calc(100% + 48px);object-fit:cover;filter:blur(18px) brightness(.85)}
+.cover-bg{position:absolute;top:-24px;left:-24px;width:calc(100% + 48px);height:calc(100% + 48px);object-fit:cover;filter:blur(18px) brightness(.85) opacity(0.75)}
 .cover-img{position:relative;display:block;width:100%;height:100%;object-fit:contain}
 
 /* Détail d'un jeu */
