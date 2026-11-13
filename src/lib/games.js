@@ -35,6 +35,7 @@ export function computeFields(values = {}, fields = []) {
   const out = { ...values };
   for (const f of fields) {
     if (f.type !== 'computed') continue;
+    if (!CALCULATORS[f.calculator]) continue;
     out[f.key] = f.calculator
       ? CALCULATORS[f.calculator](values).total
       : (f.sum ?? []).reduce((t, s) => t + (Number(values[s.key]) || 0) * (s.weight ?? 1), 0);

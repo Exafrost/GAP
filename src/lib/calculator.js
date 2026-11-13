@@ -1,6 +1,7 @@
 
 export const CALCULATORS = {
   'wonders-total': SevenWonders,
+  'miams': Miams,
 };
 
 const NumberOrZero = (x) => Number(x) || 0;
@@ -26,4 +27,9 @@ export function SevenWonders(valueDict = {}) {
     Sciences: sciences(NumberOrZero(valueDict.tablette), NumberOrZero(valueDict.compas), NumberOrZero(valueDict.rouage), NumberOrZero(valueDict.joker)),
   };
   return { total: Object.values(parts).reduce((a, b) => a + b, 0), parts };
+}
+
+export function Miams(valueDict = {}){
+  const parts = {};
+  return {total: NumberOrZero(valueDict.coeurs) + NumberOrZero(valueDict.etoiles), parts}
 }
